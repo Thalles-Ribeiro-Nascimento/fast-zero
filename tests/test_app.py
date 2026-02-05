@@ -57,10 +57,10 @@ def test_read_users_by_id(cliente):
     response = cliente.get("/users/1")
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-                "username": "alice",
-                "email": "alice@example.com",
-                "id": 1,
-            }
+        "username": "alice",
+        "email": "alice@example.com",
+        "id": 1,
+    }
 
 
 def test_read_users_by_id_not_found(cliente):
