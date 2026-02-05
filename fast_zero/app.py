@@ -1,8 +1,8 @@
 from http import HTTPStatus
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
-from fast_zero.pydanticHandler import Message, UserDB, UsersSchema, UsersSchemaResponse
+from fast_zero.pydanticHandler import Message, UserDB, UsersList, UsersSchema, UsersSchemaResponse
 
 # Inicializando uma aplicação FastAPI - objeto FastAPI()
 app = FastAPI()
@@ -30,3 +30,30 @@ def create_user(usuario: UsersSchema):
     database.append(usuario_com_id)
 
     return usuario_com_id
+
+
+@app.get("/users/", response_model=UsersList)
+def read_users():
+    return {"usuarios": database}
+
+
+@app.put("/users/{id}", response_model=UsersSchemaResponse)
+def update_user(id: int, user: UsersSchema):
+
+    if id > len(database) or id < 1:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Usuário não encontrado")
+
+    usuario = UserDB(**user.model_dump(), id=id)
+    database[id - 1] = usuario
+
+    return usuario
+
+
+@app.delete("/users/{id}", status_code=HTTPStatus.OK, response_model=Message)
+def delete_user(id: int):
+    if id > len(database) or id < 1:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Usuário não encontrado")
+
+    del database[id - 1]
+
+    return {"message": "Usuário Excluído"}

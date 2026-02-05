@@ -19,3 +19,7 @@ class UsersSchemaResponse(BaseModel):
 
 class UserDB(UsersSchema):
     id: int
+
+
+class UsersList(BaseModel):
+    usuarios: list[UsersSchemaResponse]
