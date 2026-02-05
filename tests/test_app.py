@@ -1,11 +1,7 @@
 from http import HTTPStatus
 
-from fastapi.testclient import TestClient
 
-from fast_zero.app import app
-
-
-def test_root_deve_retornar_ok_e_ola_mundo():
+def test_root_deve_retornar_ok_e_ola_mundo(cliente):
     """
     3 Etapas (AAA):
     A: Arrange - Arranjo: Configuração do que é necessário
@@ -14,11 +10,30 @@ def test_root_deve_retornar_ok_e_ola_mundo():
     :return:
     """
     # Arranjo
-    client = TestClient(app)
+    # client = TestClient(app)
 
     # Act
-    response = client.get("/")
+    response = cliente.get("/")
 
     # Assert
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {"message": "Olá, mundo!"}
+
+
+def test_create_user(cliente):
+
+    response = cliente.post(
+        "/users/",
+        json={
+            "username": "alice",
+            "email": "alice@example.com",
+            "password": "secret",
+        },
+    )
+
+    assert response.status_code == HTTPStatus.CREATED
+    assert response.json() == {
+        "username": "alice",
+        "email": "alice@example.com",
+        "id": 1,
+    }
