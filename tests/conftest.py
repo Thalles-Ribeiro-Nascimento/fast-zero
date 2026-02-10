@@ -1,6 +1,9 @@
+from contextlib import contextmanager
+from datetime import datetime
+
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
 from fast_zero.app import app
@@ -22,3 +25,22 @@ def session():
         yield session  # Fornece uma instancia de Session que será injetada em cada teste que solicita a fixture. É utilizada para interagir com o banco
 
     table_registry.metadata.drop_all(engine)  # Após os testes, dropar todas as tabelas. Isso garante que os testes serão realizados num banco limpo
+
+
+@contextmanager  # Diz para o Python que essa função faz parte de um contexto e pode ser inserido/chamado dentro de um with
+def _mock_db_time(*, model, time=datetime(2026, 1, 1)):
+    def fake_time_hook(mapper, connection, target):
+        if hasattr(target, "created_at"):  # Verifica se o target contém o atributo 'created_at', se existir, insere o Time que foi passado na função _mock_db_time
+            target.created_at = time  # Inserindo o time no atributo 'created_at'
+            # breakpoint()
+
+    event.listen(model, "before_insert", fake_time_hook)
+
+    yield time
+
+    event.remove(model, "before_insert", fake_time_hook)
+
+
+@pytest.fixture
+def mock_db_time():
+    return _mock_db_time
