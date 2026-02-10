@@ -32,7 +32,9 @@ def _mock_db_time(*, model, time=datetime(2026, 1, 1)):
     def fake_time_hook(mapper, connection, target):
         if hasattr(target, "created_at"):  # Verifica se o target contém o atributo 'created_at', se existir, insere o Time que foi passado na função _mock_db_time
             target.created_at = time  # Inserindo o time no atributo 'created_at'
-            # breakpoint()
+
+        if hasattr(target, "update_at"):
+            target.update_at = time
 
     event.listen(model, "before_insert", fake_time_hook)
 
